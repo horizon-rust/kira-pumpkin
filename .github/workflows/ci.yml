@@ -34,4 +34,7 @@ jobs:
       - run: sha256sum kira_pumpkin.wasm > kira_pumpkin.wasm.sha256
       - env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" kira_pumpkin.wasm kira_pumpkin.wasm.sha256 --repo "$GITHUB_REPOSITORY" --title "kira-pumpkin $GITHUB_REF_NAME" --notes "For Pumpkin's plugin API 0.2.1 (Minecraft 26.3). Install: https://github.com/horizon-rust/kira-pumpkin#install"
+        run: |
+          gh release create "$GITHUB_REF_NAME" kira_pumpkin.wasm kira_pumpkin.wasm.sha256 \
+            --repo "$GITHUB_REPOSITORY" --title "kira-pumpkin $GITHUB_REF_NAME" \
+            --notes "For Pumpkin's plugin API 0.2.1 (Minecraft 26.3). Install: https://github.com/horizon-rust/kira-pumpkin#install"
