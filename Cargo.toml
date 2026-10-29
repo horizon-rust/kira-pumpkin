@@ -1,0 +1,36 @@
+[package]
+name = "kira-pumpkin"
+version = "0.1.0"
+edition = "2024"
+description = "Kira, the bot of Horizon's Discord server, answering in a Pumpkin server's chat"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/horizon-rust/kira-pumpkin"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = { version = "0.9", default-features = false, features = ["parse", "serde"] }
+
+# The plugin itself: Pumpkin's WebAssembly plugin API and the WASI HTTP client underneath.
+[target.'cfg(target_family = "wasm")'.dependencies]
+pumpkin-plugin-api = { version = "=0.2.1", optional = true }
+wasi = "0.14"
+tracing = { version = "0.1", optional = true }
+
+[features]
+default = ["plugin"]
+# The Pumpkin plugin. Without it, the crate is the logic and the HTTP client alone (examples/ask.rs).
+plugin = ["dep:pumpkin-plugin-api", "dep:tracing"]
+
+[[example]]
+name = "ask"
+required-features = []
+
+[profile.release]
+lto = true
+opt-level = "s"
+strip = true

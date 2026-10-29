@@ -1,0 +1,37 @@
+name: CI
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup toolchain install stable --profile minimal --component clippy,rustfmt --target wasm32-wasip2
+      - run: cargo fmt --check
+      - run: cargo test
+      - run: cargo clippy --all-targets -- -D warnings
+      - run: cargo clippy --release --target wasm32-wasip2 -- -D warnings
+      - run: cargo build --release --target wasm32-wasip2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kira_pumpkin.wasm
+          path: target/wasm32-wasip2/release/kira_pumpkin.wasm
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: kira_pumpkin.wasm
+      - run: sha256sum kira_pumpkin.wasm > kira_pumpkin.wasm.sha256
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" kira_pumpkin.wasm kira_pumpkin.wasm.sha256 --repo "$GITHUB_REPOSITORY" --title "kira-pumpkin $GITHUB_REF_NAME" --notes "For Pumpkin's plugin API 0.2.1 (Minecraft 26.3). Install: https://github.com/horizon-rust/kira-pumpkin#install"
